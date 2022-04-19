@@ -26,7 +26,7 @@ namespace AnalyzerUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const double maxSize = 200;
+        private const double maxSize = 40;
         private const double minAngle = 25;
         public MainWindow()
         {
