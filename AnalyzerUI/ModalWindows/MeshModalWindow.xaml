@@ -1,0 +1,21 @@
+﻿<Window x:Class="AnalyzerUI.ModalWindows.MeshModalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AnalyzerUI.ModalWindows"
+        mc:Ignorable="d"
+        Title="Mesh settings" Height="250" Width="350"
+        ResizeMode="NoResize">
+    <Grid>
+        <Label Content="Максимальная площадь элемента:" HorizontalAlignment="Left" Margin="26,20,0,0" VerticalAlignment="Top" Height="30"/>
+        <TextBox Name="MaxSquareTextBox" HorizontalAlignment="Left" Margin="31,55,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="248"/>
+        <Label Content="Минимальный угол элемента:" HorizontalAlignment="Left" Margin="26,91,0,0" VerticalAlignment="Top" Height="30"/>
+        <TextBox Name="MinAngleTextBox" HorizontalAlignment="Left" Margin="31,126,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="248"/>
+        <Label Content="мм." HorizontalAlignment="Left" Margin="284,51,0,0" VerticalAlignment="Top"/>
+        <Label Content="град." HorizontalAlignment="Left" Margin="284,122,0,0" VerticalAlignment="Top"/>
+        <Button Content="Создать" Name="CreateMeshBtn" HorizontalAlignment="Left" Margin="31,167,0,0" VerticalAlignment="Top" Height="28" Width="72" Click="CreateButton_Click"/>
+        <Button Content="Отмена" x:Name="CreateMeshBtn_Copy" HorizontalAlignment="Left" Margin="113,167,0,0" VerticalAlignment="Top" Height="28" Width="72" Click="CancelButton_Click"/>
+
+    </Grid>
+</Window>

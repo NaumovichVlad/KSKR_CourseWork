@@ -10,27 +10,27 @@
         <Grid x:Name="Canvas"  Margin="0,25,54,0" Background="White" Height="350" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" HorizontalAlignment="Right" Width="750" />
         <Label Content="Ввод исходных данных" HorizontalAlignment="Left" Margin="23,11,0,0" FontSize="16" FontWeight="DemiBold" VerticalAlignment="Top"/>
         <Label Content="Ширина элемента (мм)" HorizontalAlignment="Left" Margin="23,42,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,47,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="WidthTextBox" HorizontalAlignment="Left" Margin="162,47,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Длина элемента (мм)" HorizontalAlignment="Left" Margin="23,68,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,73,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="HeightTextBox" HorizontalAlignment="Left" Margin="162,73,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Давление (Р)" HorizontalAlignment="Left" Margin="23,135,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,140,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="PressTextBox" HorizontalAlignment="Left" Margin="162,140,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Размеры повреждений (мм):" HorizontalAlignment="Left" Margin="22,223,0,0" FontWeight="DemiBold" VerticalAlignment="Top"/>
         <Label Content="l1" Margin="22,254,1027,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="47,259,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
+        <TextBox Name="L1TextBox" HorizontalAlignment="Left" Margin="47,259,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
         <Label Content="R1" HorizontalAlignment="Left" Margin="133,254,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="168,259,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="70" Height="21"/>
+        <TextBox Name="R1TextBox" HorizontalAlignment="Left" Margin="168,259,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="70" Height="21"/>
         <Label Content="l2" HorizontalAlignment="Left" Margin="22,280,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="47,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
+        <TextBox Name="L2TextBox" HorizontalAlignment="Left" Margin="47,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
         <Label Content="R2" HorizontalAlignment="Left" Margin="133,280,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="168,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="70" Height="21"/>
+        <TextBox Name="R2TextBox" HorizontalAlignment="Left" Margin="168,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="70" Height="21"/>
         <Button  Name="BuildMeshBtn" Content="Отобразить сетку" HorizontalAlignment="Left" Margin="23,330,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="BuildMeshBtn_Click"/>
         <Label Content="Коэф. Юнга" HorizontalAlignment="Left" Margin="23,161,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,166,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="JungKoefTextBox" HorizontalAlignment="Left" Margin="162,166,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Коэф. Пуассона" HorizontalAlignment="Left" Margin="23,187,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,192,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="PuassonKoefTextBox" HorizontalAlignment="Left" Margin="162,192,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Толщина элемента (мм)" HorizontalAlignment="Left" Margin="23,94,0,0"  VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" Margin="162,99,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <TextBox Name="DepthTextBox" HorizontalAlignment="Left" Margin="162,99,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
 
 
     </Grid>
