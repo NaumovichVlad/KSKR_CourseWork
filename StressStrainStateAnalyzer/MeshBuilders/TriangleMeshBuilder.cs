@@ -55,8 +55,8 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 }
             }
             var vertexPointIndex = FindThirdVertexIndex(nodes[firstPointIndex], nodes[secondPointIndex], nodes);
-            return CreateElements(firstPointIndex, secondPointIndex, vertexPointIndex, nodes, new List<IFiniteElement>(), segments);
-
+            var test = CreateElements(firstPointIndex, secondPointIndex, vertexPointIndex, nodes, new List<IFiniteElement>(), segments).Distinct().ToList();
+            return test;
         }
 
         private List<IFiniteElement> CreateElements(int firstPointIndex, int secondPointIndex, 
@@ -65,7 +65,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             var finiteElement = new TriangleFiniteElement(points[firstPointIndex], points[secondPointIndex], points[vertexPointIndex]);
             if (finiteElements.Contains(finiteElement))
                 return finiteElements;
-            else 
+            else
                 finiteElements.Add(finiteElement);
             var firstVertexPointIndex =
                 FindThirdVertexIndex(points[firstPointIndex], points[vertexPointIndex], points[secondPointIndex], points);
@@ -76,6 +76,67 @@ namespace StressStrainStateAnalyzer.MeshBulders
             if (secondVertexPointIndex != -1 && !SegmentCheck(points[secondPointIndex], points[vertexPointIndex], segments))
                 finiteElements = CreateElements(secondPointIndex, vertexPointIndex, secondVertexPointIndex, points, finiteElements, segments);
             return finiteElements;
+        }
+
+        private List<IFiniteElement> ChangeDiagonal(IFiniteElement firstTriangle, IFiniteElement secondTriangle, Segment segment)
+        {
+            var minAngle = double.MaxValue;
+            var square = firstTriangle.CalculateSquare() + secondTriangle.CalculateSquare();
+            for (int i = 0; i < firstTriangle.Nodes.Count; i++)
+            {
+                var angle = CalculateAngle(firstTriangle.Nodes[i], firstTriangle.Nodes[(i + 1) % 3], firstTriangle.Nodes[(i + 2) % 3]);
+                if (angle < minAngle)
+                    minAngle = angle;
+            }
+            for (int i = 0; i < secondTriangle.Nodes.Count; i++)
+            {
+                var angle = CalculateAngle(secondTriangle.Nodes[i], secondTriangle.Nodes[(i + 1) % 3], secondTriangle.Nodes[(i + 2) % 3]);
+                if (angle < minAngle)
+                    minAngle = angle;
+            }
+            var newNodes = new List<INode>();
+            newNodes.Add(firstTriangle.Nodes.Find(n => (!n.CoordinatesEqual(segment.First)) && (!n.CoordinatesEqual(segment.Last))));
+            newNodes.Add(secondTriangle.Nodes.Find(n => (!n.CoordinatesEqual(segment.First)) && (!n.CoordinatesEqual(segment.Last))));
+            var newElements = new List<IFiniteElement>()
+            {
+                new TriangleFiniteElement(newNodes[0], newNodes[1], segment.First),
+                new TriangleFiniteElement(newNodes[0], newNodes[1], segment.Last)
+            };
+            var newSquare = newElements[0].CalculateSquare() + newElements[1].CalculateSquare();
+            if (Math.Abs(square - newSquare) > 0.0000001)
+                return new List<IFiniteElement>()
+                {
+                    firstTriangle, secondTriangle
+                };
+            var flag = false;
+            foreach (var element in newElements)
+            {
+                for (int i = 0; i < element.Nodes.Count; i++)
+                {
+                    var angle = CalculateAngle(element.Nodes[i], element.Nodes[(i + 1) % 3], element.Nodes[(i + 2) % 3]);
+                    if (angle == 0)
+                    {
+                        return new List<IFiniteElement>()
+                        {
+                            firstTriangle, secondTriangle
+                        };
+                    }
+                    if (angle <= minAngle)
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag)
+                    break;
+            }
+            if (!flag)
+                return newElements;
+            else
+                return new List<IFiniteElement>()
+                {
+                    firstTriangle, secondTriangle
+                };
         }
 
 
@@ -166,58 +227,18 @@ namespace StressStrainStateAnalyzer.MeshBulders
 
         private void OptimizeWithRappertAlgorithm(double maxSquare, double angle)
         {
-            SplitSegments(maxSquare, angle);
-            /*for (var i = 0; i < _finiteElements.Count; i++)
+            var flag = true;
+            while (flag)
             {
-                if (_finiteElements[i].CalculateSquare() > maxSquare)
-                    *//*|| _finiteElements[i].CalculateMinAngleSize() < angle)*//*
-                {
-                    var newNode = FindCircleCenter(_finiteElements[i]);
-                    var deletedFiniteElements = _finiteElements.Where(e =>
-                        (e.Nodes.Contains(_finiteElements[i].Nodes[0]) && e.Nodes.Contains(_finiteElements[i].Nodes[1])) ||
-                        (e.Nodes.Contains(_finiteElements[i].Nodes[1]) && e.Nodes.Contains(_finiteElements[i].Nodes[2])) ||
-                        (e.Nodes.Contains(_finiteElements[i].Nodes[2]) && e.Nodes.Contains(_finiteElements[i].Nodes[0]))
-                    ).ToList();
-                    var freeNodes = new List<INode>();
-                    for (var j = 0; j < deletedFiniteElements.Count(); j++)
-                    {
-                        freeNodes = freeNodes.Concat(deletedFiniteElements[j].Nodes).ToList();
-                        _finiteElements.Remove(deletedFiniteElements[j]);
-                    }
-                    for (var j = 0; j < freeNodes.Count; j++)
-                    {
-                        var counter = 0;
-                        for (var k = 0; k < freeNodes.Count; k++)
-                        {
-                            var flag = true;
-                            if (k == j)
-                                continue;
-                            for (var m = 0; m < freeNodes.Count; m++)
-                            {
-                                if (m == j || m == k)
-                                    continue;
-                                if (FindPointSide(freeNodes[j], freeNodes[k], freeNodes[m]) != FindPointSide(freeNodes[j], freeNodes[k], newNode))
-                                {
-                                    flag = false;
-                                    break;
-                                }
-                            }
-                            if (flag)
-                            {
-                                _finiteElements.Add(new TriangleFiniteElement(freeNodes[j], freeNodes[k], newNode));
-                                counter++;
-                            }
-                            if(counter == 2)
-                            {
-                                freeNodes.Remove(freeNodes[j]);
-                                j--;
-                                break;
-                            }
-                        }
-                    }
-                    i = 0;
-                }
-            }*/
+                SplitSegments(maxSquare, angle);
+                if (SplitMinAngle(angle))
+                    continue;
+                if (SplitBigSquare(maxSquare))
+                    continue;
+                flag = false;
+            }
+
+
         }
 
         private void SplitSegments(double maxSquare, double minAngle)
@@ -225,15 +246,14 @@ namespace StressStrainStateAnalyzer.MeshBulders
             for (var i = 0; i < _finiteElements.Count; i++)
             {
                 var flag = false;
-                /*if (_finiteElements[i].CalculateSquare() < maxSquare)
-                    if (CheckSmallCorner(_finiteElements[i], minAngle))
-                        continue;*/
+                if (_finiteElements[i].CalculateSquare() < maxSquare)
+                    continue;
                 for (var j = 0; j < _finiteElements[i].Nodes.Count; j++)
                 {
                     var rad = GetLineLength(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count]);
                     var circleCenter = GetLineCenter(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count]);
-                    circleCenter.X += Math.Pow(10, -50);
-                    circleCenter.Y += Math.Pow(10, -50);
+                    circleCenter.X += Math.Pow(10, -2);
+                    circleCenter.Y += Math.Pow(10, -2);
                     if (!CheckBelonging(_finiteElements[i], circleCenter))
                         continue;
                     for (var k = 0; k < _finiteElements.Count; k++)
@@ -255,11 +275,13 @@ namespace StressStrainStateAnalyzer.MeshBulders
                     }
                     if (flag)
                     {
+                        CheckDiagonals();
                         i = 0;
                         break;
                     }
                 }
             }
+            
         }
 
         private double GetLineLength(INode firstNode, INode secondNode)
@@ -339,6 +361,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             var neighbors = new List<IFiniteElement>();
             for (var i = 0; i < element.Nodes.Count; i++)
                 neighbors.AddRange(FindTrianglesBySegment(element.Nodes[i], element.Nodes[(i + 1) % element.Nodes.Count]));
+            neighbors = neighbors.Distinct().ToList();
             neighbors.Remove(element);
             var belonging = false;
             foreach (var neighbor in neighbors)
@@ -353,7 +376,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                     if (side < 0)
                         bottom++;
                 }
-                if (top == 1 && bottom == 2)
+                if (top == 3 || bottom == 3)
                 {
                     belonging = true;
                     break;
@@ -362,77 +385,8 @@ namespace StressStrainStateAnalyzer.MeshBulders
             return belonging;
         }
 
-        private bool CheckSmallCorner(IFiniteElement element, double minAngle)
-        {
-            var smallAngle = false;
-            for (var i = 0; i < element.Nodes.Count; i++)
-            {
-                var test_tmp = CalculateAngle(element.Nodes[i], element.Nodes[(i + 1) % element.Nodes.Count],
-                    element.Nodes[(i + 2) % element.Nodes.Count]);
-                if (test_tmp < minAngle)
-                {
-                    smallAngle = true;
-                    /*var deletedTriangles = FindTrianglesBySegment(element.Nodes[i], element.Nodes[(i + 2) % element.Nodes.Count]);
-                    deletedTriangles.AddRange(FindTrianglesBySegment(element.Nodes[(i + 1) % element.Nodes.Count], element.Nodes[(i + 2) % element.Nodes.Count]));
-                    deletedTriangles = deletedTriangles.Distinct().ToList();
-                    deletedTriangles.Remove(element);
-                    if (deletedTriangles.Count == 2)
-                    {
-                        var newNodes = new List<INode>();
-                        var segments = new List<Segment>();
-                        for (int k = 0; k < deletedTriangles.Count; k++)
-                        {
-                            for (var j = 0; j < deletedTriangles[k].Nodes.Count; j++)
-                            {
-                                if (element.Nodes.Contains(deletedTriangles[k].Nodes[j])
-                                    && element.Nodes.Contains(deletedTriangles[k].Nodes[(j + 1) % deletedTriangles[k].Nodes.Count]))
-                                {
-                                    segments.Add(new Segment(deletedTriangles[k].Nodes[j],
-                                        deletedTriangles[k].Nodes[(j + 2) % deletedTriangles[k].Nodes.Count]));
-                                    segments.Add(new Segment(deletedTriangles[k].Nodes[(j + 1) % deletedTriangles[k].Nodes.Count],
-                                        deletedTriangles[k].Nodes[(j + 2) % deletedTriangles[k].Nodes.Count]));
-                                    segments = CloseContour(segments);
-                                }
-                            }
 
-                        }
-                        _finiteElements.Remove(element);
-                        for (int k = 0; k < deletedTriangles.Count; k++)
-                        {
-                            _finiteElements.Remove(deletedTriangles[k]);
-                            for (int j = 0; j < segments.Count; j++)
-                            {
-                                if (!newNodes.Contains(segments[j].Last))
-                                    newNodes.Add(segments[j].Last);
-                                if (!newNodes.Contains(segments[j].First))
-                                    newNodes.Add(segments[j].First);
-                            }
-                        }
-                        for (var r = 0.8; r < GetLineLength(element.Nodes[i], element.Nodes[(i + 2) % element.Nodes.Count]); r *= 2)
-                        {
-                            var projection = CalculateProjectionSize(element.Nodes[(i + 2) % element.Nodes.Count], element.Nodes[i], r);
-                            var newX = element.Nodes[(i + 2) % element.Nodes.Count].X + projection;
-                            var newY = (newX - element.Nodes[(i + 2) % element.Nodes.Count].X) / (element.Nodes[i].X - element.Nodes[(i + 2) % element.Nodes.Count].X)
-                                * (element.Nodes[i].Y - element.Nodes[(i + 2) % element.Nodes.Count].Y) + element.Nodes[(i + 2) % element.Nodes.Count].Y;
-                            newNodes.Add(new Node() { X = newX, Y = newY });
-                        }
-                        for (var r = 0.8; r < GetLineLength(element.Nodes[(i + 1) % element.Nodes.Count], element.Nodes[(i + 2) % element.Nodes.Count]); r *= 2)
-                        {
-                            var projection = CalculateProjectionSize(element.Nodes[(i + 2) % element.Nodes.Count], element.Nodes[(i + 1) % element.Nodes.Count], r);
-                            var newX = element.Nodes[(i + 2) % element.Nodes.Count].X + projection;
-                            var newY = (newX - element.Nodes[(i + 2) % element.Nodes.Count].X) / (element.Nodes[(i + 1) % element.Nodes.Count].X - element.Nodes[(i + 2) % element.Nodes.Count].X)
-                                * (element.Nodes[(i + 1) % element.Nodes.Count].Y - element.Nodes[(i + 2) % element.Nodes.Count].Y) + element.Nodes[(i + 2) % element.Nodes.Count].Y;
-                            newNodes.Add(new Node() { X = newX, Y = newY });
-                        }
-                        _finiteElements.AddRange(BuildInitialPartition(newNodes, segments));
-                    }*/
-                    break;
-                }
-            }
-            return smallAngle;
-        }
-
-        private double CalculateProjectionSize(INode lastNode, INode vertexNode, double length)
+        /*private double CalculateProjectionSize(INode lastNode, INode vertexNode, double length)
         {
             var tmpNode = new Node() { X = lastNode.X, Y = vertexNode.Y };
             var corner = CalculateAngle(lastNode, tmpNode, vertexNode);
@@ -441,7 +395,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 return projection;
             else
                 return -projection;
-        }
+        }*/
 
         private List<Segment> CloseContour(List<Segment> segments)
         {
@@ -449,7 +403,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             INode end = null;
             foreach (var segment in segments)
             {
-                var firstConter = 0;
+                var firstConter = 0; 
                 var secondConter = 0;
                 for (var i = 0; i < segments.Count; i++)
                 {
@@ -467,10 +421,10 @@ namespace StressStrainStateAnalyzer.MeshBulders
                     if (end == null)
                         end = segment.Last;
                     else
-                        start = segment.First;
+                        start = segment.Last;
             }
             if (start == null || end == null)
-                throw new Exception();
+                return segments;
             segments.Add(new Segment(start, end));
             return segments;
         }
@@ -496,14 +450,179 @@ namespace StressStrainStateAnalyzer.MeshBulders
             return segments;
         }
 
+        private bool SplitMinAngle(double minAngle)
+        {
+            var flag = false;
+            for (var i = 0; i < _finiteElements.Count; i++)
+            {
+                
+                for (var j = 0; j < _finiteElements[i].Nodes.Count; j++)
+                {
+                    if (CalculateAngle(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count],
+                        _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]) < minAngle)
+                    {
+                        var center = FindCircleCenter(_finiteElements[i]);
+                        var deletedTriangles = FindTrianglesBySegment(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]);
+                        deletedTriangles.AddRange(FindTrianglesBySegment(_finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count], 
+                            _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]));
+                        deletedTriangles = deletedTriangles.Distinct().ToList();
+                        deletedTriangles.Remove(_finiteElements[i]);
+                        var belonging = false;
+                        foreach (var triangle in deletedTriangles)
+                            if(CheckBelonging(triangle, center))
+                                belonging = true;
+                        if (!belonging)
+                            break;
+                        flag = true;
+                        var newNodes = new List<INode>();
+                        var segments = new List<Segment>();
+                        for (int k = 0; k < deletedTriangles.Count; k++)
+                        {
+                            for (var m = 0; m < deletedTriangles[k].Nodes.Count; m++)
+                            {
+                                if (_finiteElements[i].Nodes.Contains(deletedTriangles[k].Nodes[m])
+                                    && _finiteElements[i].Nodes.Contains(deletedTriangles[k].Nodes[(m + 1) % deletedTriangles[k].Nodes.Count]))
+                                {
+                                    segments.Add(new Segment(deletedTriangles[k].Nodes[m],
+                                        deletedTriangles[k].Nodes[(m + 2) % deletedTriangles[k].Nodes.Count]));
+                                    segments.Add(new Segment(deletedTriangles[k].Nodes[(m + 1) % deletedTriangles[k].Nodes.Count],
+                                        deletedTriangles[k].Nodes[(m + 2) % deletedTriangles[k].Nodes.Count]));
+                                }
+                            }
+
+                        }
+                        if (deletedTriangles.Count == 2)
+                            segments = CloseContour(segments);
+                        if (deletedTriangles.Count == 1)
+                            segments = CloseContour(segments, _finiteElements[i]);
+                        _finiteElements.Remove(_finiteElements[i]);
+                        for (int k = 0; k < deletedTriangles.Count; k++)
+                        {
+                            _finiteElements.Remove(deletedTriangles[k]);
+                            for (int m = 0; m < segments.Count; m++)
+                            {
+                                if (!newNodes.Contains(segments[m].Last))
+                                    newNodes.Add(segments[m].Last);
+                                if (!newNodes.Contains(segments[m].First))
+                                    newNodes.Add(segments[m].First);
+                            }
+                        }
+                        newNodes.Add(center);
+                        _finiteElements.AddRange(BuildInitialPartition(newNodes, segments));
+                        break;
+                    }
+                }
+                if (flag)
+                    break;
+            }
+            return flag;
+        }
+
+        private bool SplitBigSquare(double maxSquare)
+        {
+            var flag = false;
+            for (var i = 0; i < _finiteElements.Count; i++)
+            {
+                for (var j = 0; j < _finiteElements[i].Nodes.Count; j++)
+                {
+                    if (_finiteElements[i].CalculateSquare() > maxSquare)
+                    {
+                        var center = FindCircleCenter(_finiteElements[i]);
+                        var deletedTriangles = FindTrianglesBySegment(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]);
+                        deletedTriangles.AddRange(FindTrianglesBySegment(_finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count],
+                            _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]));
+                        deletedTriangles.AddRange(FindTrianglesBySegment(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count]));
+                        deletedTriangles = deletedTriangles.Distinct().ToList();
+                        deletedTriangles.Remove(_finiteElements[i]);
+                        var belonging = false;
+                        foreach (var triangle in deletedTriangles)
+                            if (CheckBelonging(triangle, center))
+                                belonging = true;
+                        if (!belonging)
+                            break;
+                        flag = true;
+                        var newNodes = new List<INode>();
+                        var segments = new List<Segment>();
+                        for (int k = 0; k < deletedTriangles.Count; k++)
+                        {
+                            for (var m = 0; m < deletedTriangles[k].Nodes.Count; m++)
+                            {
+                                if (_finiteElements[i].Nodes.Contains(deletedTriangles[k].Nodes[m])
+                                    && _finiteElements[i].Nodes.Contains(deletedTriangles[k].Nodes[(m + 1) % deletedTriangles[k].Nodes.Count]))
+                                {
+                                    segments.Add(new Segment(deletedTriangles[k].Nodes[m],
+                                        deletedTriangles[k].Nodes[(m + 2) % deletedTriangles[k].Nodes.Count]));
+                                    segments.Add(new Segment(deletedTriangles[k].Nodes[(m + 1) % deletedTriangles[k].Nodes.Count],
+                                        deletedTriangles[k].Nodes[(m + 2) % deletedTriangles[k].Nodes.Count]));
+                                }
+                            }
+
+                        }
+                        if (deletedTriangles.Count == 2)
+                            segments = CloseContour(segments);
+                        if (deletedTriangles.Count == 1)
+                            segments = CloseContour(segments, _finiteElements[i]);
+                        _finiteElements.Remove(_finiteElements[i]);
+                        for (int k = 0; k < deletedTriangles.Count; k++)
+                        {
+                            _finiteElements.Remove(deletedTriangles[k]);
+                            for (int m = 0; m < segments.Count; m++)
+                            {
+                                if (!newNodes.Contains(segments[m].Last))
+                                    newNodes.Add(segments[m].Last);
+                                if (!newNodes.Contains(segments[m].First))
+                                    newNodes.Add(segments[m].First);
+                            }
+                        }
+                        newNodes.Add(center);
+                        _finiteElements.AddRange(BuildInitialPartition(newNodes, segments));
+                        break;
+                    }
+                }
+                if (flag)
+                    break;
+            }
+            return flag;
+        }
+
+        private void CheckDiagonals()
+        {
+            for (var j = 0; j < _finiteElements.Count; j++)
+            {
+                var flag = false;
+                for (var i = 0; i < _finiteElements[j].Nodes.Count; i++)
+                {
+                    var deletedElements = FindTrianglesBySegment(_finiteElements[j].Nodes[i], _finiteElements[j].Nodes[(i + 1) % _finiteElements[j].Nodes.Count]).Distinct().ToList();
+                    deletedElements.Remove(_finiteElements[j]);
+                    if (deletedElements.Count != 0)
+                    {
+                        var newElements = ChangeDiagonal(deletedElements[0], _finiteElements[j],
+                            new Segment(_finiteElements[j].Nodes[i], _finiteElements[j].Nodes[(i + 1) % _finiteElements[j].Nodes.Count]));
+                        if (!newElements.Contains(_finiteElements[j]))
+                        {
+                            flag = true;
+                            _finiteElements.Remove(_finiteElements[j]);
+                            _finiteElements.Remove(deletedElements[0]);
+                            _finiteElements.AddRange(newElements);
+                        }
+                    }
+                    if (flag)
+                    {
+                        j = 0;
+                        break;
+                    }
+                }
+            }
+        }
+            
         private INode FindCircleCenter(IFiniteElement element)
         {
             var x12 = element.Nodes[0].X - element.Nodes[1].X;
             var x23 = element.Nodes[1].X - element.Nodes[2].X;
-            var x31 = element.Nodes[2].X - element.Nodes[1].X;
+            var x31 = element.Nodes[2].X - element.Nodes[0].X;
             var y12 = element.Nodes[0].Y - element.Nodes[1].Y;
             var y23 = element.Nodes[1].Y - element.Nodes[2].Y;
-            var y31 = element.Nodes[2].Y - element.Nodes[1].Y;
+            var y31 = element.Nodes[2].Y - element.Nodes[0].Y;
             var z = x12 * y31 - y12 * x31;
             var z1 = Math.Pow(element.Nodes[0].X, 2) + Math.Pow(element.Nodes[0].Y, 2);
             var z2 = Math.Pow(element.Nodes[1].X, 2) + Math.Pow(element.Nodes[1].Y, 2);
@@ -515,7 +634,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             return new Node { X = rx, Y = ry };
         }
 
-        private class Segment
+        public class Segment
         {
             public INode First { get; set; }
             public INode Last { get; set; }

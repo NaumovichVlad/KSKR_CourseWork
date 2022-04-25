@@ -16,7 +16,17 @@ namespace StressStrainStateAnalyzer.Meshes
         public Mesh(IMeshBuilder builder, List<INode> nodes, double maxSquare, double angle)
         {
             FiniteElements = builder.BuildMesh(nodes, maxSquare, angle);
-        }   
+        }
+
+        public List<double> GetSquares()
+        {
+            var squares = new List<double>();
+            foreach (var element in FiniteElements)
+            {
+                squares.Add(element.CalculateSquare());
+            }
+            return squares;
+        }
     }
 }
 

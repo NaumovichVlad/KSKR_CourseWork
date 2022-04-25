@@ -31,7 +31,7 @@ namespace StressStrainStateAnalyzer.FiniteElements
                 return 0;
             for (var i = 0; i < sides.Length; i++)
                 square *= p - sides[i];
-            return Math.Sqrt(square);
+            return Math.Sqrt(square * p);
         }
 
         public double CalculateMinAngleSize()

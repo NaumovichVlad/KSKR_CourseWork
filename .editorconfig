@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# CS8602: Разыменование вероятной пустой ссылки.
+dotnet_diagnostic.CS8602.severity = silent
+
+# CS8605: Распаковка-преобразование вероятного значения NULL.
+dotnet_diagnostic.CS8605.severity = silent
