@@ -1,19 +1,19 @@
 ﻿using StressStrainStateAnalyzer.Nodes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StressStrainStateAnalyzer.FiniteElements
 {
     public interface IFiniteElement
     {
-        public int Index { get; set; }
-        public List<INode> Nodes { get; }
+        int Index { get; set; }
+        List<INode> Nodes { get; }
+        double[,] LocalStiffnessMatrix { get; }
+        double[,] Sig { get; set; }
+        double Stress { get; }
 
+        void CreateLocalStiffnessMatrix(double depth,
+            double elasticModulus, double poissonsRatio);
+        void CalculateStress();
         double CalculateSquare();
-
         double CalculateMinAngleSize();
     }
 }

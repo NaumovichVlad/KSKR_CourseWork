@@ -169,7 +169,7 @@ namespace StressStrainStateAnalyzerTests
             var secondTestNode = new Node() { X = 8, Y = 5 };
             var parameters = new object[] { firstTestNode, secondTestNode, testNodes };
             var expected = 5;
-            var actual = Invoke<object>("FindThirdVertexIndex", new Type[] {typeof(INode), typeof(INode), typeof(List<INode>)}, parameters);
+            var actual = Invoke<object>("FindThirdVertexIndex", new Type[] { typeof(INode), typeof(INode), typeof(List<INode>) }, parameters);
             Assert.AreEqual(expected, (int)actual);
         }
 

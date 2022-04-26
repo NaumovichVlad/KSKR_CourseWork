@@ -41,6 +41,7 @@
         <TextBox Name="PuassonKoefTextBox" HorizontalAlignment="Left" Margin="162,192,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Толщина элемента (мм)" HorizontalAlignment="Left" Margin="23,94,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="DepthTextBox" HorizontalAlignment="Left" Margin="162,99,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
+        <Button Name="MakeCalculationsBtn" Content="Произвести расчёты" IsEnabled="False" HorizontalAlignment="Left" Margin="22,402,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="MakeCalculationsBtn_Click"/>
 
 
     </Grid>

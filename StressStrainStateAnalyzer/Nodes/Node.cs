@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StressStrainStateAnalyzer.Nodes
+﻿namespace StressStrainStateAnalyzer.Nodes
 {
     public class Node : INode
     {
@@ -13,17 +7,17 @@ namespace StressStrainStateAnalyzer.Nodes
         public int Index { get; set; }
         public bool IsFixed { get; set; }
 
-        public Node () 
+        public Node()
         { }
 
-        public Node (double x, double y, int index, bool isFixed)
+        public Node(double x, double y, int index, bool isFixed)
         {
             X = x;
             Y = y;
             Index = index;
             IsFixed = isFixed;
-        } 
-        
+        }
+
         public bool CoordinatesEqual(INode node) => X == node.X && Y == node.Y;
 
         public override bool Equals(object? obj)

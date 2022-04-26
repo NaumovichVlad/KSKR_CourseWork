@@ -6,9 +6,7 @@ using StressStrainStateAnalyzer.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -21,10 +19,12 @@ namespace AnalyzerUI
     {
         private double _maxSize = 40;
         private double _minAngle = 25;
+        private Mesh? _mesh;
         public MainWindow()
         {
             InitializeComponent();
             InitializeInputs();
+            InitializeAxis(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), 10);
         }
 
         private void InitializeInputs()
@@ -37,7 +37,6 @@ namespace AnalyzerUI
             L2TextBox.Text = "40";
             R2TextBox.Text = "20";
             PressTextBox.Text = "100";
-            InitializeAxis(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), 10);
         }
 
         private void BuildMeshBtn_Click(object sender, RoutedEventArgs e)
@@ -53,15 +52,15 @@ namespace AnalyzerUI
                 _minAngle = double.Parse(modalWin.MinAngleTextBox.Text);
                 var nodes = BuildMesh(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), double.Parse(L1TextBox.Text),
                     double.Parse(R1TextBox.Text), double.Parse(L2TextBox.Text), double.Parse(R2TextBox.Text));
-                var mesh = MeshFactory.GetMesh(FiniteElementsTypes.Triangular, nodes, _maxSize, _minAngle);
-                DrawMesh(mesh.FiniteElements, double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text));
-                
-                InitializeSquareLabels(mesh);
+                var _mesh = MeshFactory.GetMesh(FiniteElementsTypes.Triangular, nodes, _maxSize, _minAngle);
+                DrawMesh(_mesh.FiniteElements, double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text));
+                InitializeSquareLabels(_mesh);
                 InitializeAxis(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), 10);
                 Canvas.Children.Add(XLabel);
                 Canvas.Children.Add(YLabel);
                 Canvas.Children.Add(X10Label);
                 Canvas.Children.Add(Y10Label);
+                MakeCalculationsBtn.IsEnabled = true;
             }
 
         }
@@ -249,12 +248,9 @@ namespace AnalyzerUI
             return Math.Acos((2 * Math.Pow(r, 2) - Math.Pow(l, 2)) / 2 / Math.Pow(r, 2));
         }
 
-
-
-
         private int CalculateSplitsCount(double length, double elementSquare)
         {
-            var side = Math.Sqrt( 4 * elementSquare / Math.Sqrt(3));
+            var side = Math.Sqrt(4 * elementSquare / Math.Sqrt(3));
             return (int)Math.Round(length / side);
         }
 
@@ -282,6 +278,11 @@ namespace AnalyzerUI
         {
             var ratio = Canvas.Width / Canvas.Height * 0.8;
             return -coordinate / ratio * Canvas.Height / figureSideSize + Canvas.Height * 0.8;
+        }
+
+        private void MakeCalculationsBtn_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

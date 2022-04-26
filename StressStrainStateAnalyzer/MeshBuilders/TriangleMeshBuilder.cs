@@ -50,7 +50,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 if (!flag)
                 {
                     firstPointIndex = nodes.IndexOf(segments[i].First);
-                    secondPointIndex= nodes.IndexOf(segments[i].Last);
+                    secondPointIndex = nodes.IndexOf(segments[i].Last);
                     break;
                 }
             }
@@ -59,7 +59,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             return test;
         }
 
-        private List<IFiniteElement> CreateElements(int firstPointIndex, int secondPointIndex, 
+        private List<IFiniteElement> CreateElements(int firstPointIndex, int secondPointIndex,
             int vertexPointIndex, List<INode> points, List<IFiniteElement> finiteElements, List<Segment> segments)
         {
             var finiteElement = new TriangleFiniteElement(points[firstPointIndex], points[secondPointIndex], points[vertexPointIndex]);
@@ -188,10 +188,10 @@ namespace StressStrainStateAnalyzer.MeshBulders
 
         private double CalculateAngle(INode firstNode, INode secondNode, INode vertexNode)
         {
-           /* var numerator = (vertexNode.X - firstNode.X) * (vertexNode.X - secondNode.X)
-                + (vertexNode.Y - firstNode.Y) * (vertexNode.Y - secondNode.Y);
-            var denomenator = Math.Sqrt(Math.Pow(vertexNode.X - firstNode.X, 2) + Math.Pow(vertexNode.Y - firstNode.Y, 2))
-                * Math.Sqrt(Math.Pow(vertexNode.X - secondNode.X, 2) + Math.Pow(vertexNode.Y - secondNode.Y, 2));*/
+            /* var numerator = (vertexNode.X - firstNode.X) * (vertexNode.X - secondNode.X)
+                 + (vertexNode.Y - firstNode.Y) * (vertexNode.Y - secondNode.Y);
+             var denomenator = Math.Sqrt(Math.Pow(vertexNode.X - firstNode.X, 2) + Math.Pow(vertexNode.Y - firstNode.Y, 2))
+                 * Math.Sqrt(Math.Pow(vertexNode.X - secondNode.X, 2) + Math.Pow(vertexNode.Y - secondNode.Y, 2));*/
             var a = Math.Sqrt(Math.Pow(firstNode.X - vertexNode.X, 2) + Math.Pow(firstNode.Y - vertexNode.Y, 2));
             var b = Math.Sqrt(Math.Pow(secondNode.X - vertexNode.X, 2) + Math.Pow(secondNode.Y - vertexNode.Y, 2));
             var c = Math.Sqrt(Math.Pow(firstNode.X - secondNode.X, 2) + Math.Pow(firstNode.Y - secondNode.Y, 2));
@@ -220,7 +220,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 {
                     flag = true;
                     break;
-                }    
+                }
             }
             return flag;
         }
@@ -281,7 +281,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                     }
                 }
             }
-            
+
         }
 
         private double GetLineLength(INode firstNode, INode secondNode)
@@ -310,7 +310,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             {
                 for (var j = 0; j < deletedTriangles[i].Nodes.Count; j++)
                 {
-                    if (triangle.Nodes.Contains(deletedTriangles[i].Nodes[j]) 
+                    if (triangle.Nodes.Contains(deletedTriangles[i].Nodes[j])
                         && triangle.Nodes.Contains(deletedTriangles[i].Nodes[(j + 1) % deletedTriangles[i].Nodes.Count]))
                     {
                         segments.Add(new Segment(deletedTriangles[i].Nodes[j],
@@ -319,7 +319,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                             deletedTriangles[i].Nodes[(j + 2) % deletedTriangles[i].Nodes.Count]));
                     }
                 }
-                
+
             }
             if (deletedTriangles.Count == 2)
                 segments = CloseContour(segments);
@@ -338,7 +338,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 }
             }
             newNodes.Add(newNode);
-            _finiteElements.AddRange(BuildInitialPartition(newNodes,segments));
+            _finiteElements.AddRange(BuildInitialPartition(newNodes, segments));
         }
 
         private List<IFiniteElement> FindTrianglesBySegment(INode firstNode, INode secondNode)
@@ -403,7 +403,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             INode end = null;
             foreach (var segment in segments)
             {
-                var firstConter = 0; 
+                var firstConter = 0;
                 var secondConter = 0;
                 for (var i = 0; i < segments.Count; i++)
                 {
@@ -455,7 +455,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
             var flag = false;
             for (var i = 0; i < _finiteElements.Count; i++)
             {
-                
+
                 for (var j = 0; j < _finiteElements[i].Nodes.Count; j++)
                 {
                     if (CalculateAngle(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count],
@@ -463,13 +463,13 @@ namespace StressStrainStateAnalyzer.MeshBulders
                     {
                         var center = FindCircleCenter(_finiteElements[i]);
                         var deletedTriangles = FindTrianglesBySegment(_finiteElements[i].Nodes[j], _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]);
-                        deletedTriangles.AddRange(FindTrianglesBySegment(_finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count], 
+                        deletedTriangles.AddRange(FindTrianglesBySegment(_finiteElements[i].Nodes[(j + 1) % _finiteElements[i].Nodes.Count],
                             _finiteElements[i].Nodes[(j + 2) % _finiteElements[i].Nodes.Count]));
                         deletedTriangles = deletedTriangles.Distinct().ToList();
                         deletedTriangles.Remove(_finiteElements[i]);
                         var belonging = false;
                         foreach (var triangle in deletedTriangles)
-                            if(CheckBelonging(triangle, center))
+                            if (CheckBelonging(triangle, center))
                                 belonging = true;
                         if (!belonging)
                             break;
@@ -614,7 +614,7 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 }
             }
         }
-            
+
         private INode FindCircleCenter(IFiniteElement element)
         {
             var x12 = element.Nodes[0].X - element.Nodes[1].X;
@@ -656,6 +656,6 @@ namespace StressStrainStateAnalyzer.MeshBulders
                 return HashCode.Combine(First, Last);
             }
         }
-            
+
     }
 }

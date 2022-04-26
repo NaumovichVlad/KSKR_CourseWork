@@ -1,20 +1,36 @@
 ﻿using StressStrainStateAnalyzer.Nodes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StressStrainStateAnalyzer.FiniteElements
 {
     public class TriangleFiniteElement : IFiniteElement
     {
+        private readonly MatrixContainer _container;
         public int Index { get; set; }
         public List<INode> Nodes { get; }
+        public double Stress { get; private set; }
+        public double[,] LocalStiffnessMatrix => _container.LocalStiffnessMatrix;
+        public double[,] Sig
+        {
+            get => _container.Sig;
+            set => _container.Sig = value;
+        }
 
         public TriangleFiniteElement(INode firstNode, INode secondNode, INode thirdNode)
         {
             Nodes = new List<INode>() { firstNode, secondNode, thirdNode };
+            _container = new MatrixContainer();
+        }
+
+        public void CreateLocalStiffnessMatrix(double depth, double elasticModulus,
+            double poissonsRatio)
+        {
+            _container.InitializeMatrixes(depth, elasticModulus, poissonsRatio,
+                CalculateSquare(), Nodes);
+        }
+
+        public void CalculateStress()
+        {
+            Stress = _container.CalculateStress();
         }
 
         public double CalculateSquare()
@@ -61,7 +77,7 @@ namespace StressStrainStateAnalyzer.FiniteElements
                 && Nodes.Any(n => n.CoordinatesEqual(element.Nodes[0]))
                 && Nodes.Any(n => n.CoordinatesEqual(element.Nodes[1]))
                 && Nodes.Any(n => n.CoordinatesEqual(element.Nodes[2]));
-                
+
         }
 
         public override int GetHashCode()

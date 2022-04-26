@@ -5,7 +5,12 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>png-transparent-mathematics-computer-icons.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="png-transparent-mathematics-computer-icons.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\StressStrainStateAnalyzer\StressStrainStateAnalyzer.csproj" />

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using StressStrainStateAnalyzer.Nodes;
 
 namespace StressStrainStateAnalyzer.Extensions
 {
@@ -97,6 +93,58 @@ namespace StressStrainStateAnalyzer.Extensions
                 }
             }
             return (a_1);
+        }
+
+        public static double[,] CalcGauss(this double[,] matrix, List<INode> nodes)
+        {
+            double variable;
+            for (var i = 0; i < nodes.Count * 2; i++)
+            {
+                if (matrix[i, i] == 0)
+                {
+                    var index = i + 1;
+                    while (index < nodes.Count * 2)
+                    {
+                        if (matrix[index, i] != 0)
+                            break;
+                        index++;
+                    }
+
+                    if (index != nodes.Count * 2)
+                    {
+                        for (var j = i; j < nodes.Count * 2 + 1; j++)
+                        {
+                            matrix[i, j] = matrix[i, j] + matrix[index, j];
+                            matrix[index, j] = matrix[i, j] - matrix[index, j];
+                            matrix[i, j] = matrix[i, j] - matrix[index, j];
+                        }
+                    }
+                }
+
+                variable = matrix[i, i];
+                for (var j = nodes.Count * 2; j >= i; j--)
+                    matrix[i, j] = matrix[i, j] / variable;
+
+                for (var j = i + 1; j < nodes.Count * 2; j++)
+                {
+                    variable = matrix[j, i];
+                    if (variable != 0)
+                        for (var k = nodes.Count * 2; k >= i; k--)
+                            matrix[j, k] = matrix[j, k] - variable * matrix[i, k];
+                }
+
+            }
+
+            for (var i = nodes.Count * 2 - 1; i > 0; i--)
+            {
+                for (var j = i - 1; j >= 0; j--)
+                {
+                    matrix[j, nodes.Count * 2] -= matrix[j, i] * matrix[i, nodes.Count * 2];
+                    matrix[j, i] = 0;
+                }
+            }
+
+            return matrix;
         }
     }
 }
