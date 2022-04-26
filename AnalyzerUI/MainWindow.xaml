@@ -19,13 +19,13 @@
             <Label Name="Y10Label" Content="10 mm" HorizontalAlignment="Left" Margin="7,246,0,0" VerticalAlignment="Top" Foreground="blue" FontSize="8"/>
         </Grid>
         <Label Content="Ввод исходных данных" HorizontalAlignment="Left" Margin="23,11,0,0" FontSize="16" FontWeight="DemiBold" VerticalAlignment="Top"/>
-        <Label Content="Ширина элемента (мм)" HorizontalAlignment="Left" Margin="23,42,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Ширина элемента (м)" HorizontalAlignment="Left" Margin="23,42,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="WidthTextBox" HorizontalAlignment="Left" Margin="162,47,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
-        <Label Content="Длина элемента (мм)" HorizontalAlignment="Left" Margin="23,68,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Длина элемента (м)" HorizontalAlignment="Left" Margin="23,68,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="HeightTextBox" HorizontalAlignment="Left" Margin="162,73,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
-        <Label Content="Давление (Р)" HorizontalAlignment="Left" Margin="23,135,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Давление (Па)" HorizontalAlignment="Left" Margin="23,135,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="PressTextBox" HorizontalAlignment="Left" Margin="162,140,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
-        <Label Content="Размеры повреждений (мм):" HorizontalAlignment="Left" Margin="22,223,0,0" FontWeight="DemiBold" VerticalAlignment="Top"/>
+        <Label Content="Размеры повреждений (м):" HorizontalAlignment="Left" Margin="22,223,0,0" FontWeight="DemiBold" VerticalAlignment="Top"/>
         <Label Content="l1" Margin="22,254,0,0"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="19"/>
         <TextBox Name="L1TextBox" HorizontalAlignment="Left" Margin="47,259,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
         <Label Content="R1" HorizontalAlignment="Left" Margin="133,254,0,0"  VerticalAlignment="Top"/>
@@ -39,7 +39,7 @@
         <TextBox Name="JungKoefTextBox" HorizontalAlignment="Left" Margin="162,166,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Коэф. Пуассона" HorizontalAlignment="Left" Margin="23,187,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="PuassonKoefTextBox" HorizontalAlignment="Left" Margin="162,192,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
-        <Label Content="Толщина элемента (мм)" HorizontalAlignment="Left" Margin="23,94,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Толщина элемента (м)" HorizontalAlignment="Left" Margin="23,94,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="DepthTextBox" HorizontalAlignment="Left" Margin="162,99,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Button Name="MakeCalculationsBtn" Content="Произвести расчёты" IsEnabled="False" HorizontalAlignment="Left" Margin="22,402,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="MakeCalculationsBtn_Click"/>
 

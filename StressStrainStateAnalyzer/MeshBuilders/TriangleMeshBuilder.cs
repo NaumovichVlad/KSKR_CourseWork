@@ -14,6 +14,14 @@ namespace StressStrainStateAnalyzer.MeshBulders
             _nodes = nodes;
             _finiteElements = BuildInitialPartition(_nodes, InitializeSegments(_nodes));
             OptimizeWithRappertAlgorithm(maxElementSquare, minAngle);
+            var newNodes = new List<INode>();
+            _finiteElements.ForEach(e => newNodes.AddRange(e.Nodes));
+            newNodes = newNodes.Distinct().ToList();
+            foreach (var node in newNodes)
+            {
+                node.X /= 1000;
+                node.Y /= 1000;
+            };
             return _finiteElements;
         }
 

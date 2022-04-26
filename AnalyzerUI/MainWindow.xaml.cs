@@ -24,38 +24,38 @@ namespace AnalyzerUI
         {
             InitializeComponent();
             InitializeInputs();
-            InitializeAxis(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), 10);
+            InitializeAxis(double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000, 10);
         }
 
         private void InitializeInputs()
         {
-            HeightTextBox.Text = "100";
-            WidthTextBox.Text = "200";
-            DepthTextBox.Text = "1";
-            L1TextBox.Text = "80";
-            R1TextBox.Text = "40";
-            L2TextBox.Text = "40";
-            R2TextBox.Text = "20";
+            HeightTextBox.Text = "0,1";
+            WidthTextBox.Text = "0,2";
+            DepthTextBox.Text = "0,0001";
+            L1TextBox.Text = "0,08";
+            R1TextBox.Text = "0,04";
+            L2TextBox.Text = "0,04";
+            R2TextBox.Text = "0,02";
             PressTextBox.Text = "100";
         }
 
         private void BuildMeshBtn_Click(object sender, RoutedEventArgs e)
         {
             var modalWin = new MeshModalWindow();
-            modalWin.MaxSquareTextBox.Text = "100";
+            modalWin.MaxSquareTextBox.Text = "0,0001";
             modalWin.MinAngleTextBox.Text = "20";
             modalWin.ShowDialog();
             if (!modalWin.IsCancel)
             {
                 Canvas.Children.Clear();
-                _maxSize = double.Parse(modalWin.MaxSquareTextBox.Text);
+                _maxSize = double.Parse(modalWin.MaxSquareTextBox.Text) * 1000000;
                 _minAngle = double.Parse(modalWin.MinAngleTextBox.Text);
-                var nodes = BuildMesh(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), double.Parse(L1TextBox.Text),
-                    double.Parse(R1TextBox.Text), double.Parse(L2TextBox.Text), double.Parse(R2TextBox.Text));
-                var _mesh = MeshFactory.GetMesh(FiniteElementsTypes.Triangular, nodes, _maxSize, _minAngle);
-                DrawMesh(_mesh.FiniteElements, double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text));
+                var nodes = BuildMesh(double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000, double.Parse(L1TextBox.Text) * 1000,
+                    double.Parse(R1TextBox.Text) * 1000, double.Parse(L2TextBox.Text) * 1000, double.Parse(R2TextBox.Text) * 1000);
+                _mesh = MeshFactory.GetMesh(FiniteElementsTypes.Triangular, nodes, _maxSize, _minAngle);
+                DrawMesh(_mesh.FiniteElements, double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000);
                 InitializeSquareLabels(_mesh);
-                InitializeAxis(double.Parse(WidthTextBox.Text), double.Parse(HeightTextBox.Text), 10);
+                InitializeAxis(double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000, 10);
                 Canvas.Children.Add(XLabel);
                 Canvas.Children.Add(YLabel);
                 Canvas.Children.Add(X10Label);
@@ -69,9 +69,9 @@ namespace AnalyzerUI
         {
             var squares = mesh.GetSquares();
             CountLabel.Content = "Number of elements: " + squares.Count;
-            AvSquareLabel.Content = "Average square: " + Math.Round(squares.Average(), 2) + " mm^2";
-            MaxSquareLabel.Content = "Max square: " + Math.Round(squares.Max(), 2) + " mm^2";
-            MinSquareLabel.Content = "Min square: " + Math.Round(squares.Min(), 2) + " mm^2";
+            AvSquareLabel.Content = "Average square: " + Math.Round(squares.Average(), 8) + " m^2";
+            MaxSquareLabel.Content = "Max square: " + Math.Round(squares.Max(), 8) + " m^2";
+            MinSquareLabel.Content = "Min square: " + Math.Round(squares.Min(), 8) + " m^2";
             Canvas.Children.Add(AvSquareLabel);
             Canvas.Children.Add(MaxSquareLabel);
             Canvas.Children.Add(MinSquareLabel);
@@ -260,7 +260,7 @@ namespace AnalyzerUI
             foreach (var element in elements)
             {
                 var points = element.Nodes.Select(n =>
-                    new Point(FormatX(n.X, a), FormatY(n.Y, b))).ToList();
+                    new Point(FormatX(n.X * 1000, a), FormatY(n.Y * 1000, b))).ToList();
                 var triangle = new Polygon();
                 triangle.Points = new PointCollection(points);
                 triangle.Stroke = Brushes.Black;
@@ -282,7 +282,8 @@ namespace AnalyzerUI
 
         private void MakeCalculationsBtn_Click(object sender, RoutedEventArgs e)
         {
-
+            _mesh.MakeCalculations(double.Parse(DepthTextBox.Text), double.Parse(PressTextBox.Text), 
+                double.Parse(PuassonKoefTextBox.Text), double.Parse(JungKoefTextBox.Text));
         }
     }
 }

@@ -20,7 +20,15 @@ namespace StressStrainStateAnalyzer.Meshes
             FiniteElements = builder.BuildMesh(nodes, maxSquare, angle);
             _nodes = new List<INode>();
             FiniteElements.ForEach(f => _nodes.AddRange(f.Nodes));
+            _nodes = _nodes.Distinct().ToList();
+            AddIndexes();
             GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
+        }
+
+        private void AddIndexes()
+        {
+            for (var i = 0; i < _nodes.Count; i++)
+                _nodes[i].Index = i;
         }
 
         public void MakeCalculations(double depth, double force, double poissonsRatio, double elasticityModulus)
