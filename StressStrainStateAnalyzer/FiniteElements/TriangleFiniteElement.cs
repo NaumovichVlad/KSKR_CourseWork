@@ -8,6 +8,9 @@ namespace StressStrainStateAnalyzer.FiniteElements
         public int Index { get; set; }
         public List<INode> Nodes { get; }
         public double Stress { get; private set; }
+
+        public double DisplacementX { get; set; }
+        public double DisplacementY { get; set; }
         public double[,] LocalStiffnessMatrix => _container.LocalStiffnessMatrix;
         public double[,] Sig
         {

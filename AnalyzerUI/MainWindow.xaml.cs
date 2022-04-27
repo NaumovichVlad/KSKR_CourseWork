@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -31,12 +32,14 @@ namespace AnalyzerUI
         {
             HeightTextBox.Text = "0,1";
             WidthTextBox.Text = "0,2";
-            DepthTextBox.Text = "0,0001";
+            DepthTextBox.Text = "0,001";
             L1TextBox.Text = "0,08";
             R1TextBox.Text = "0,04";
             L2TextBox.Text = "0,04";
             R2TextBox.Text = "0,02";
             PressTextBox.Text = "100";
+            JungKoefTextBox.Text = "210E9";
+            PuassonKoefTextBox.Text = "0,28";
         }
 
         private void BuildMeshBtn_Click(object sender, RoutedEventArgs e)
@@ -54,13 +57,14 @@ namespace AnalyzerUI
                     double.Parse(R1TextBox.Text) * 1000, double.Parse(L2TextBox.Text) * 1000, double.Parse(R2TextBox.Text) * 1000);
                 _mesh = MeshFactory.GetMesh(FiniteElementsTypes.Triangular, nodes, _maxSize, _minAngle);
                 DrawMesh(_mesh.FiniteElements, double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000);
-                InitializeSquareLabels(_mesh);
-                InitializeAxis(double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000, 10);
-                Canvas.Children.Add(XLabel);
-                Canvas.Children.Add(YLabel);
-                Canvas.Children.Add(X10Label);
-                Canvas.Children.Add(Y10Label);
                 MakeCalculationsBtn.IsEnabled = true;
+                DeformationBtn.IsEnabled = false;
+                DisplacementXBtn.IsEnabled = false;
+                DisplacementYBtn.IsEnabled = false;
+                StressBtn.IsEnabled = false;
+                MaxStressTextBox.Text = "0,00";
+                MaxDisplacementYTextBox.Text = "0,00";
+                MaxDisplacementXTextBox.Text = "0.00";
             }
 
         }
@@ -256,11 +260,19 @@ namespace AnalyzerUI
 
         private void DrawMesh(List<IFiniteElement> elements, double a, double b)
         {
-            Canvas.Children.Clear();
+            ClearCanvas();
             foreach (var element in elements)
             {
                 var points = element.Nodes.Select(n =>
                     new Point(FormatX(n.X * 1000, a), FormatY(n.Y * 1000, b))).ToList();
+                for (int i = 0; i < points.Count; i++)
+                {
+                    var label = new Label();
+                    label.Content = element.Nodes[i].Index.ToString();
+                    label.FontSize = 8;
+                    label.Margin = new Thickness(points[i].X - 5, points[i].Y - 6, 0, 0);
+                    Canvas.Children.Add(label);
+                }
                 var triangle = new Polygon();
                 triangle.Points = new PointCollection(points);
                 triangle.Stroke = Brushes.Black;
@@ -282,8 +294,138 @@ namespace AnalyzerUI
 
         private void MakeCalculationsBtn_Click(object sender, RoutedEventArgs e)
         {
+            _mesh.ApplyForceByXAxis(double.Parse(WidthTextBox.Text));
+            _mesh.AddFixationByXAxis(0);
             _mesh.MakeCalculations(double.Parse(DepthTextBox.Text), double.Parse(PressTextBox.Text), 
                 double.Parse(PuassonKoefTextBox.Text), double.Parse(JungKoefTextBox.Text));
+            MaxStressTextBox.Text = Math.Round(_mesh.MaxStress, 8).ToString();
+            MaxDisplacementYTextBox.Text = Math.Round(_mesh.MaxYDeformation, 8).ToString();
+            MaxDisplacementXTextBox.Text = Math.Round(_mesh.MaxXDeformation, 8).ToString();
+            DeformationBtn.IsEnabled = true;
+            DisplacementXBtn.IsEnabled = true;
+            DisplacementYBtn.IsEnabled = true;
+            StressBtn.IsEnabled = true;
+        }
+
+        private void DeformationBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ClearCanvas();
+            foreach (var element in _mesh.FiniteElements)
+            {
+                var points = new List<Point>();
+                var j = 0;
+                for (var i = 0; i < element.Nodes.Count; i++)
+                {
+                    points.Add(new Point(FormatX((element.Nodes[i].X + element.Sig[j, 0]) * 1000, double.Parse(WidthTextBox.Text) * 1000),
+                        FormatY((element.Nodes[i].Y + element.Sig[j + 1, 0]) * 1000, double.Parse(HeightTextBox.Text) * 1000)));
+                    j += 2;
+                }
+                var triangle = new Polygon();
+                triangle.Points = new PointCollection(points);
+                triangle.Stroke = Brushes.Black;
+                Canvas.Children.Add(triangle);
+            }
+        }
+
+        private void StressBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ClearCanvas();
+            foreach (var element in _mesh.FiniteElements)
+            {
+                var points = new List<Point>();
+                var j = 0;
+                for (var i = 0; i < element.Nodes.Count; i++)
+                {
+                    points.Add(new Point(FormatX((element.Nodes[i].X + element.Sig[j, 0]) * 1000, double.Parse(WidthTextBox.Text) * 1000),
+                        FormatY((element.Nodes[i].Y + element.Sig[j + 1, 0]) * 1000, double.Parse(HeightTextBox.Text) * 1000)));
+                    j += 2;
+                }
+                var triangle = new Polygon();
+                triangle.Points = new PointCollection(points);
+                triangle.Fill = GetBrush(element.Stress / _mesh.MaxStress);
+                triangle.Stroke = Brushes.Black;
+                Canvas.Children.Add(triangle);
+            }
+        }
+
+        private void DisplacementXBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ClearCanvas();
+            foreach (var element in _mesh.FiniteElements)
+            {
+                var points = new List<Point>();
+                var j = 0;
+                for (var i = 0; i < element.Nodes.Count; i++)
+                {
+                    points.Add(new Point(FormatX((element.Nodes[i].X + element.Sig[j, 0]) * 1000, double.Parse(WidthTextBox.Text) * 1000),
+                        FormatY((element.Nodes[i].Y + element.Sig[j + 1, 0]) * 1000, double.Parse(HeightTextBox.Text) * 1000)));
+                    j += 2;
+                }
+                var triangle = new Polygon();
+                triangle.Points = new PointCollection(points);
+                var min = _mesh.FiniteElements.Min(e => e.DisplacementX);
+                var max = _mesh.FiniteElements.Max(e => e.DisplacementX);
+                triangle.Fill = GetBrush((element.DisplacementX - min) / (max - min));
+                triangle.Stroke = Brushes.Black;
+                Canvas.Children.Add(triangle);
+            }
+        }
+
+        private void DisplacementYBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ClearCanvas();
+            foreach (var element in _mesh.FiniteElements)
+            {
+                var points = new List<Point>();
+                var j = 0;
+                for (var i = 0; i < element.Nodes.Count; i++)
+                {
+                    points.Add(new Point(FormatX((element.Nodes[i].X + element.Sig[j, 0]) * 1000, double.Parse(WidthTextBox.Text) * 1000),
+                        FormatY((element.Nodes[i].Y + element.Sig[j + 1, 0]) * 1000, double.Parse(HeightTextBox.Text) * 1000)));
+                    j += 2;
+                }
+                var triangle = new Polygon();
+                triangle.Points = new PointCollection(points);
+                var min = _mesh.FiniteElements.Min(e => e.DisplacementY);
+                var max = _mesh.FiniteElements.Max(e => e.DisplacementY);
+                triangle.Fill = GetBrush((element.DisplacementY - min) / (max - min));
+                triangle.Stroke = Brushes.Black;
+                Canvas.Children.Add(triangle);
+            }
+        }
+
+        private void ClearCanvas()
+        {
+            Canvas.Children.Clear();
+            InitializeSquareLabels(_mesh);
+            InitializeAxis(double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000, 10);
+            Canvas.Children.Add(XLabel);
+            Canvas.Children.Add(YLabel);
+            Canvas.Children.Add(X10Label);
+            Canvas.Children.Add(Y10Label);
+        }
+
+        private SolidColorBrush GetBrush(double coeff)
+        {
+            if (coeff < 0.1)
+                return new SolidColorBrush(Color.FromRgb(0, 0, 255));
+            if (coeff < 0.2)
+                return new SolidColorBrush(Color.FromRgb(0, 125, 255));
+            if (coeff < 0.3)
+                return new SolidColorBrush(Color.FromRgb(0, 255, 255));
+            if (coeff < 0.4)
+                return new SolidColorBrush(Color.FromRgb(0, 255, 125));
+            if (coeff < 0.5)
+                return new SolidColorBrush(Color.FromRgb(0, 255, 0));
+            if (coeff < 0.6)
+                return new SolidColorBrush(Color.FromRgb(125, 255, 0));
+            if (coeff < 0.7)
+                return new SolidColorBrush(Color.FromRgb(255, 255, 0));
+            if (coeff < 0.8)
+                return new SolidColorBrush(Color.FromRgb(255, 125, 0));
+            if (coeff < 0.9)
+                return new SolidColorBrush(Color.FromRgb(255, 90, 0));
+            return new SolidColorBrush(Color.FromRgb(255, 0, 0));
         }
     }
 }

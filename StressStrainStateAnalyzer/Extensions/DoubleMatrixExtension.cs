@@ -92,7 +92,7 @@ namespace StressStrainStateAnalyzer.Extensions
                     }
                 }
             }
-            return (a_1);
+            return a_1;
         }
 
         public static double[,] CalcGauss(this double[,] matrix, List<INode> nodes)

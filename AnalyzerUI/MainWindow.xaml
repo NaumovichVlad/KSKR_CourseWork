@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnalyzerUI"
         mc:Ignorable="d"
-        Title="Анализ НДС элемента трубопровода" Height="554" Width="1068"
+        Title="Анализ НДС элемента трубопровода" Height="597" Width="1068"
         ResizeMode="NoResize">
-    <Grid Background="#FFE8E8E8" Margin="0,0,0,-6">
+    <Grid Background="#FFE8E8E8" Height="584" VerticalAlignment="Top">
         <Grid x:Name="Canvas"  Margin="264,25,0,0" Background="White" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="750" Height="350" VerticalAlignment="Top" >
             <Label Name="AvSquareLabel" Content="Average square:" Margin="572,18,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
             <Label Name="MaxSquareLabel" Content="Max square:" Margin="572,31,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
@@ -34,15 +34,26 @@
         <TextBox Name="L2TextBox" HorizontalAlignment="Left" Margin="47,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="62" Height="21"/>
         <Label Content="R2" HorizontalAlignment="Left" Margin="133,280,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="R2TextBox" HorizontalAlignment="Left" Margin="168,285,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="70" Height="21"/>
-        <Button  Name="BuildMeshBtn" Content="Отобразить сетку" HorizontalAlignment="Left" Margin="23,330,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="BuildMeshBtn_Click"/>
+        <Button  Name="BuildMeshBtn" Content="Отобразить сетку" HorizontalAlignment="Left" Margin="23,320,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="BuildMeshBtn_Click"/>
         <Label Content="Коэф. Юнга" HorizontalAlignment="Left" Margin="23,161,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="JungKoefTextBox" HorizontalAlignment="Left" Margin="162,166,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Коэф. Пуассона" HorizontalAlignment="Left" Margin="23,187,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="PuassonKoefTextBox" HorizontalAlignment="Left" Margin="162,192,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
         <Label Content="Толщина элемента (м)" HorizontalAlignment="Left" Margin="23,94,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="DepthTextBox" HorizontalAlignment="Left" Margin="162,99,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="76" Height="21"/>
-        <Button Name="MakeCalculationsBtn" Content="Произвести расчёты" IsEnabled="False" HorizontalAlignment="Left" Margin="22,402,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="MakeCalculationsBtn_Click"/>
-
-
+        <Button Name="MakeCalculationsBtn" Content="Произвести расчёты" IsEnabled="False" HorizontalAlignment="Left" Margin="800,394,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="MakeCalculationsBtn_Click"/>
+        <Button Name="DeformationBtn" Content="Отобразить деформацию" IsEnabled="False" HorizontalAlignment="Left" Margin="800,424,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="DeformationBtn_Click"/>
+        <Button Name="StressBtn" Content="Отобразить напряжение" IsEnabled="False" HorizontalAlignment="Left" Margin="800,454,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="StressBtn_Click"/>
+        <Button Name="DisplacementXBtn" Content="Отобразить перемещение X" IsEnabled="False" HorizontalAlignment="Left" Margin="800,484,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="DisplacementXBtn_Click"/>
+        <Button Name="DisplacementYBtn" Content="Отобразить перемещение Y" IsEnabled="False" HorizontalAlignment="Left" Margin="800,514,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="DisplacementYBtn_Click"/>
+        <GroupBox Header="Результаты вычислений"  Margin="408,387,296,45" BorderBrush="Black"/>
+        <GroupBox Header="Результаты верификации"  Margin="22,387,679,45" BorderBrush="Black"/>
+        <Button  Name="VerifyMeshBtn" Content="Верификация" HorizontalAlignment="Left" Margin="22,350,0,0" VerticalAlignment="Top" Height="25" Width="215" />
+        <TextBox Name="MaxDisplacementXTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
+        <TextBox Name="MaxDisplacementYTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,433,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
+        <Label Content="Максимальное смешение по оси Y:" HorizontalAlignment="Left" Margin="417,429,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Максимальное напряжение:" HorizontalAlignment="Left" Margin="417,454,0,0"  VerticalAlignment="Top"/>
+        <TextBox Name="MaxStressTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,460,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
+        <Label Content="Максимальное смешение по оси Х:" HorizontalAlignment="Left" Margin="417,404,0,0"  VerticalAlignment="Top"/>
     </Grid>
 </Window>

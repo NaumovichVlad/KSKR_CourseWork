@@ -7,12 +7,15 @@ namespace StressStrainStateAnalyzer.Meshes
 {
     public class Mesh
     {
+        private List<int> _forcedNodesIndexes = new List<int>();
         private List<INode> _nodes;
         public List<IFiniteElement> FiniteElements { get; set; }
         public double[,] GlobalStiffnessMatrix { get; set; }
         public double MaxStress { get; set; }
         public double MaxXDeformation { get; set; }
         public double MaxYDeformation { get; set; }
+        public double MinXDeformation { get; set; }
+        public double MinYDeformation { get; set; }
 
 
         public Mesh(IMeshBuilder builder, List<INode> nodes, double maxSquare, double angle)
@@ -20,7 +23,7 @@ namespace StressStrainStateAnalyzer.Meshes
             FiniteElements = builder.BuildMesh(nodes, maxSquare, angle);
             _nodes = new List<INode>();
             FiniteElements.ForEach(f => _nodes.AddRange(f.Nodes));
-            _nodes = _nodes.Distinct().ToList();
+            _nodes = _nodes.Distinct().OrderBy(n => n.X).ThenBy(n => n.Y).ToList();
             AddIndexes();
             GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
         }
@@ -29,6 +32,33 @@ namespace StressStrainStateAnalyzer.Meshes
         {
             for (var i = 0; i < _nodes.Count; i++)
                 _nodes[i].Index = i;
+            foreach (var node in _nodes)
+                foreach (var element in FiniteElements)
+                    foreach (var elNode in element.Nodes)
+                        if (elNode.CoordinatesEqual(node))
+                            elNode.Index = node.Index;
+        }
+
+        public void AddFixationByXAxis(double x)
+        {
+            foreach (var node in _nodes)
+                if (node.X == x)
+                    node.IsFixed = true;
+            var lastFixedNode = _nodes.OrderBy(n => n.X).First(n => n.X != 0 && n.Y == 0);
+            lastFixedNode.IsFixed = true;
+            foreach (var node in _nodes)
+                foreach (var element in FiniteElements)
+                    foreach (var elNode in element.Nodes)
+                        if (elNode.Index == node.Index || elNode.Index == lastFixedNode.Index)
+                            elNode.IsFixed = node.IsFixed;
+
+        }
+
+        public void ApplyForceByXAxis(double x)
+        {
+            foreach (var node in _nodes)
+                if (node.X == x)
+                    _forcedNodesIndexes.Add(node.Index);
         }
 
         public void MakeCalculations(double depth, double force, double poissonsRatio, double elasticityModulus)
@@ -36,7 +66,7 @@ namespace StressStrainStateAnalyzer.Meshes
             CalculateGlobalStiffnessMatrix(depth, poissonsRatio, elasticityModulus, force);
             foreach (var element in FiniteElements)
                 element.CalculateStress();
-            CalculateMaxDeformations();
+            CalculateDeformations();
 
         }
 
@@ -67,10 +97,9 @@ namespace StressStrainStateAnalyzer.Meshes
                         GlobalStiffnessMatrix[2 * indexes[j] + 1, 2 * indexes[k] + 1] = GlobalStiffnessMatrix[2 * indexes[j] + 1, 2 * indexes[k] + 1] + FiniteElements[i].LocalStiffnessMatrix[j * 2 + 1, k * 2 + 1];
                     }
             }
-            var fixedNodes = _nodes.Where(n => n.IsFixed).Select(n => n.Index).ToList();
 
-            for (var i = 0; i < fixedNodes.Count; i++)
-                GlobalStiffnessMatrix[fixedNodes[i] * 2, _nodes.Count * 2] = force;
+            for (var i = 0; i < _forcedNodesIndexes.Count; i++)
+                GlobalStiffnessMatrix[_forcedNodesIndexes[i] * 2, _nodes.Count * 2] = force;
 
             for (var i = 0; i < _nodes.Count; i++)
                 if (_nodes[i].IsFixed)
@@ -97,10 +126,22 @@ namespace StressStrainStateAnalyzer.Meshes
             }
         }
 
-        private void CalculateMaxDeformations()
+        private void CalculateDeformations()
         {
             MaxXDeformation = GlobalStiffnessMatrix[0, 2 * _nodes.Count];
             MaxYDeformation = GlobalStiffnessMatrix[0, 2 * _nodes.Count];
+            MinXDeformation = GlobalStiffnessMatrix[0, 2 * _nodes.Count];
+            MinYDeformation = GlobalStiffnessMatrix[0, 2 * _nodes.Count];
+
+            for (var i = 0; i < FiniteElements.Count; i++)
+            {
+                FiniteElements[i].DisplacementX = Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[0].Index, 2 * _nodes.Count]) 
+                    + Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[1].Index, 2 * _nodes.Count]) 
+                    + Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[2].Index, 2 * _nodes.Count]);
+                FiniteElements[i].DisplacementY = Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[0].Index + 1, 2 * _nodes.Count])
+                    + Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[1].Index + 1, 2 * _nodes.Count])
+                    + Math.Abs(GlobalStiffnessMatrix[2 * FiniteElements[i].Nodes[2].Index + 1, 2 * _nodes.Count]);
+            }
 
             for (int i = 0; i < _nodes.Count; i++)
             {
@@ -108,12 +149,13 @@ namespace StressStrainStateAnalyzer.Meshes
                     MaxXDeformation = GlobalStiffnessMatrix[i * 2, 2 * _nodes.Count];
                 if (GlobalStiffnessMatrix[i * 2 + 1, 2 * _nodes.Count] > MaxYDeformation)
                     MaxYDeformation = GlobalStiffnessMatrix[i * 2 + 1, 2 * _nodes.Count];
+                if (GlobalStiffnessMatrix[i * 2, 2 * _nodes.Count] < MinXDeformation)
+                    MinXDeformation = GlobalStiffnessMatrix[i * 2, 2 * _nodes.Count];
+                if (GlobalStiffnessMatrix[i * 2 + 1, 2 * _nodes.Count] < MinYDeformation)
+                    MinYDeformation = GlobalStiffnessMatrix[i * 2 + 1, 2 * _nodes.Count];
             }
 
-            MaxStress = FiniteElements[0].Stress;
-            for (int i = 0; i < FiniteElements.Count; i++)
-                if (FiniteElements[i].Stress > MaxStress)
-                    MaxStress = FiniteElements[i].Stress;
+            MaxStress = FiniteElements.Max(e => e.Stress);
         }
     }
 }

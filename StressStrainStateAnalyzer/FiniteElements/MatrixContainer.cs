@@ -46,7 +46,7 @@ namespace StressStrainStateAnalyzer.FiniteElements
                 j %= _coordinateMatrix.GetLength(0);
                 _coordinateMatrix[i, j] = 1;
                 _coordinateMatrix[i, j + 1] = elementNodes[counter].X;
-                _coordinateMatrix[i, j + 1] = elementNodes[counter].Y;
+                _coordinateMatrix[i, j + 2] = elementNodes[counter].Y;
                 j += _coordinateMatrix.GetLength(0) / 2;
                 if (j == _coordinateMatrix.GetLength(0))
                     counter++;
