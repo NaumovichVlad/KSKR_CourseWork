@@ -47,13 +47,13 @@
         <Button Name="DisplacementXBtn" Content="Отобразить перемещение X" IsEnabled="False" HorizontalAlignment="Left" Margin="800,484,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="DisplacementXBtn_Click"/>
         <Button Name="DisplacementYBtn" Content="Отобразить перемещение Y" IsEnabled="False" HorizontalAlignment="Left" Margin="800,514,0,0" VerticalAlignment="Top" Height="25" Width="214" Click="DisplacementYBtn_Click"/>
         <GroupBox Header="Результаты вычислений"  Margin="408,387,296,45" BorderBrush="Black"/>
-        <GroupBox Header="Результаты верификации"  Margin="22,387,679,45" BorderBrush="Black"/>
-        <Button  Name="VerifyMeshBtn" Content="Верификация" HorizontalAlignment="Left" Margin="22,350,0,0" VerticalAlignment="Top" Height="25" Width="215" />
+        <GroupBox Header="Для верификации"  Margin="22,387,679,45" BorderBrush="Black"/>
+        <Button Content="Импортировать сетку"  Name="VerifyMeshBtn" HorizontalAlignment="Left" Margin="22,350,0,0" VerticalAlignment="Top" Height="25" Width="215" Click="VerifyMeshBtn_Click" />
         <TextBox Name="MaxDisplacementXTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
         <TextBox Name="MaxDisplacementYTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,433,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
-        <Label Content="Максимальное смешение по оси Y:" HorizontalAlignment="Left" Margin="417,429,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Максимальное смещение по оси Y:" HorizontalAlignment="Left" Margin="417,429,0,0"  VerticalAlignment="Top"/>
         <Label Content="Максимальное напряжение:" HorizontalAlignment="Left" Margin="417,454,0,0"  VerticalAlignment="Top"/>
         <TextBox Name="MaxStressTextBox" IsReadOnly="True" Text="0,00" HorizontalAlignment="Left" Margin="634,460,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="114" Height="22"/>
-        <Label Content="Максимальное смешение по оси Х:" HorizontalAlignment="Left" Margin="417,404,0,0"  VerticalAlignment="Top"/>
+        <Label Content="Максимальное смещение по оси Х:" HorizontalAlignment="Left" Margin="417,404,0,0"  VerticalAlignment="Top"/>
     </Grid>
 </Window>

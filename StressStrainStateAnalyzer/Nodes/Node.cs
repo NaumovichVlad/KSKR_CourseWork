@@ -10,12 +10,11 @@
         public Node()
         { }
 
-        public Node(double x, double y, int index, bool isFixed)
+        public Node(double x, double y, int index)
         {
             X = x;
             Y = y;
             Index = index;
-            IsFixed = isFixed;
         }
 
         public bool CoordinatesEqual(INode node) => X == node.X && Y == node.Y;

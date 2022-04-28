@@ -18,6 +18,8 @@ namespace StressStrainStateAnalyzer.FiniteElements
             set => _container.Sig = value;
         }
 
+        public TriangleFiniteElement()
+        { }
         public TriangleFiniteElement(INode firstNode, INode secondNode, INode thirdNode)
         {
             Nodes = new List<INode>() { firstNode, secondNode, thirdNode };

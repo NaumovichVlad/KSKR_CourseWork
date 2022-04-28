@@ -28,6 +28,13 @@ namespace StressStrainStateAnalyzer.Meshes
             GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
         }
 
+        public Mesh(List<INode> nodes, List<IFiniteElement> elements)
+        {
+            FiniteElements = elements;
+            _nodes = nodes;
+            GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
+        }
+
         private void AddIndexes()
         {
             for (var i = 0; i < _nodes.Count; i++)

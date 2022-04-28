@@ -19,7 +19,7 @@ namespace StressStrainStateAnalyzer.FiniteElements
         public MatrixContainer()
         {
             LocalStiffnessMatrix = new double[6, 6];
-            Sig = new double[6, 6];
+            Sig = new double[6, 1];
             _coordinateMatrix = new double[6, 6];
             _inverseCoordinateMatrix = new double[6, 6];
             _elasticityMatrix = new double[3, 3];

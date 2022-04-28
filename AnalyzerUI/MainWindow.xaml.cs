@@ -1,4 +1,5 @@
 ﻿using AnalyzerUI.ModalWindows;
+using StressStrainStateAnalyzer.Extensions;
 using StressStrainStateAnalyzer.FiniteElements;
 using StressStrainStateAnalyzer.Meshes;
 using StressStrainStateAnalyzer.Meshes.Factory;
@@ -20,6 +21,8 @@ namespace AnalyzerUI
     {
         private double _maxSize = 40;
         private double _minAngle = 25;
+        private const double h3 = 0.05;
+        private const double w3 = 0.02;
         private Mesh? _mesh;
         public MainWindow()
         {
@@ -188,10 +191,10 @@ namespace AnalyzerUI
             for (var i = lengthB; i < b; i += lengthB)
                 nodes.Add(new Node() { X = a, Y = i });
             nodes.Add(new Node() { X = a, Y = b });
-            var startLength = (a - l1 - l2) / 4;
+            var startLength = (a - l1 - l2 - w3 * 1000) / 5;
             var lengthS = startLength / CalculateSplitsCount(startLength, _maxSize);
             var splits = new List<INode>();
-            for (var i = lengthS; i < startLength - lengthS / 4; i += lengthS)
+            for (var i = lengthS; i < startLength - lengthS / 5; i += lengthS)
                 splits.Add(new Node() { X = i, Y = b });
             var sectors = AddSector(l1, r1, startLength, a, b, CalculateSplitsCount(CalculateArcLength(r1, l1), _maxSize));
             startLength *= 2;
@@ -200,15 +203,25 @@ namespace AnalyzerUI
             for (var i = sectors[sectors.Count - 1].X + lengthS; i < startLength - lengthS / 4; i += lengthS)
                 splits.Add(new Node() { X = i, Y = b });
             sectors.AddRange(AddSector(l2, r2, startLength, a, b, CalculateSplitsCount(CalculateArcLength(r2, l2), _maxSize)));
-            lengthS = (a - sectors[sectors.Count - 1].X) / CalculateSplitsCount((a - sectors[sectors.Count - 1].X), _maxSize);
-            for (var i = sectors[sectors.Count - 1].X + lengthS; i < a - lengthS / 4; i += lengthS)
-                splits.Add(new Node() { X = i, Y = b });
+            startLength += l2 + (a - l1 - l2 - w3 * 1000) / 5;
+            sectors.AddRange(AddCrack(w3 * 1000, h3 * 1000, startLength, a, b));
             sectors.AddRange(splits);
-            nodes.AddRange(sectors.OrderByDescending(n => n.X));
+            nodes.AddRange(sectors);
 
             return nodes;
         }
 
+        private List<INode> AddCrack(double w, double h, double startLength, double a, double b)
+        {
+            var hNodesCount = CalculateSplitsCount(h, _maxSize);
+            var hLength = h / hNodesCount;
+            var nodes = new List<INode>();
+            for (var i = 0.0; i <= h; i += hLength)
+                nodes.Add(new Node() { X = startLength, Y = b - i});
+            for (var i = 0.0; i <= h; i += hLength)
+                nodes.Add(new Node() { X = startLength + w, Y = b - h + i });
+            return nodes;
+        }
 
         private List<INode> AddSector(double l, double r, double startLength, double a, double b, int nodesCount)
         {
@@ -426,6 +439,14 @@ namespace AnalyzerUI
             if (coeff < 0.9)
                 return new SolidColorBrush(Color.FromRgb(255, 90, 0));
             return new SolidColorBrush(Color.FromRgb(255, 0, 0));
+        }
+
+        private void VerifyMeshBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var nodes = InputDate.Nodes();
+            var elements = InputDate.Elements(nodes);
+            _mesh = new Mesh(nodes, elements);
+            DrawMesh(_mesh.FiniteElements, 200, 100);
         }
     }
 }
