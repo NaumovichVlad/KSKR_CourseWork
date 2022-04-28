@@ -22,7 +22,7 @@ namespace AnalyzerUI
         private double _maxSize = 40;
         private double _minAngle = 25;
         private const double h3 = 0.05;
-        private const double w3 = 0.02;
+        private const double w3 = 0.01;
         private Mesh? _mesh;
         public MainWindow()
         {
@@ -196,15 +196,18 @@ namespace AnalyzerUI
             var splits = new List<INode>();
             for (var i = lengthS; i < startLength - lengthS / 5; i += lengthS)
                 splits.Add(new Node() { X = i, Y = b });
-            var sectors = AddSector(l1, r1, startLength, a, b, CalculateSplitsCount(CalculateArcLength(r1, l1), _maxSize));
+            var sectors = AddCrack(w3 * 1000, h3 * 1000, startLength, a, b);
             startLength *= 2;
-            startLength += l1;
+            startLength += w3;
             lengthS = (startLength - sectors[sectors.Count - 1].X) / CalculateSplitsCount((startLength - sectors[sectors.Count - 1].X), _maxSize);
-            for (var i = sectors[sectors.Count - 1].X + lengthS; i < startLength - lengthS / 4; i += lengthS)
+            for (var i = sectors[sectors.Count - 1].X + lengthS; i < startLength - lengthS / 5; i += lengthS)
                 splits.Add(new Node() { X = i, Y = b });
             sectors.AddRange(AddSector(l2, r2, startLength, a, b, CalculateSplitsCount(CalculateArcLength(r2, l2), _maxSize)));
             startLength += l2 + (a - l1 - l2 - w3 * 1000) / 5;
-            sectors.AddRange(AddCrack(w3 * 1000, h3 * 1000, startLength, a, b));
+            sectors.AddRange(AddSector(l1, r1, startLength, a, b, CalculateSplitsCount(CalculateArcLength(r1, l1), _maxSize)));
+            lengthS = (a - sectors[sectors.Count - 1].X) / CalculateSplitsCount(a - sectors[sectors.Count - 1].X, _maxSize);
+            for (var i = sectors[sectors.Count - 1].X + lengthS; i < a; i += lengthS)
+                splits.Add(new Node() { X = i, Y = b });
             sectors.AddRange(splits);
             nodes.AddRange(sectors);
 
