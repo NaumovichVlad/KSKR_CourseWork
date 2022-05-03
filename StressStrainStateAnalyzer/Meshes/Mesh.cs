@@ -28,6 +28,13 @@ namespace StressStrainStateAnalyzer.Meshes
             GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
         }
 
+        public Mesh(List<IFiniteElement> finiteElements, List<INode> nodes)
+        {
+            _nodes = nodes;
+            FiniteElements = finiteElements;
+            GlobalStiffnessMatrix = new double[_nodes.Count * 2, _nodes.Count * 2 + 1];
+        }
+
         private void AddIndexes()
         {
             for (var i = 0; i < _nodes.Count; i++)
@@ -42,15 +49,10 @@ namespace StressStrainStateAnalyzer.Meshes
         public void AddFixationByXAxis(double x)
         {
             foreach (var node in _nodes)
-                if (node.X == x)
+                if (Math.Abs(node.X - x) < Math.Pow(10, -15))
                     node.IsFixed = true;
             var lastFixedNode = _nodes.OrderBy(n => n.X).First(n => n.X != 0 && n.Y == 0);
             lastFixedNode.IsFixed = true;
-            foreach (var node in _nodes)
-                foreach (var element in FiniteElements)
-                    foreach (var elNode in element.Nodes)
-                        if (elNode.Index == node.Index || elNode.Index == lastFixedNode.Index)
-                            elNode.IsFixed = node.IsFixed;
 
         }
 
@@ -99,7 +101,7 @@ namespace StressStrainStateAnalyzer.Meshes
             }
 
             for (var i = 0; i < _forcedNodesIndexes.Count; i++)
-                GlobalStiffnessMatrix[_forcedNodesIndexes[i] * 2, _nodes.Count * 2] = force;
+                GlobalStiffnessMatrix[_forcedNodesIndexes[i] * 2, _nodes.Count * 2] = force * 0.076;
 
             for (var i = 0; i < _nodes.Count; i++)
                 if (_nodes[i].IsFixed)

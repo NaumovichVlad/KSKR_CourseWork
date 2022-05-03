@@ -10,4 +10,8 @@
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="IronXL.Excel" Version="2022.3.0" />
+  </ItemGroup>
+
 </Project>

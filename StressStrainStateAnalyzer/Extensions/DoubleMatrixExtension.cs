@@ -2,6 +2,7 @@
 
 namespace StressStrainStateAnalyzer.Extensions
 {
+    //Методы расширения для работы с матрицами
     internal static class DoubleMatrixExtension
     {
         //Произведение матриц
@@ -18,10 +19,14 @@ namespace StressStrainStateAnalyzer.Extensions
         //Произвадение матрицы на число
         public static double[,] Multiply(this double[,] a, double b)
         {
+            var copy = new double[a.GetLength(0), a.GetLength(1)];
+            for (int i = 0; i < a.GetLength(0); i++)
+                for (int j = 0; j < a.GetLength(1); j++)
+                    copy[i, j] = a[i, j];
             for (var i = 0; i < a.GetLength(0); i++)
                 for (var j = 0; j < a.GetLength(1); j++)
-                    a[i, j] = a[i, j] * b;
-            return a;
+                    copy[i, j] = a[i, j] * b;
+            return copy;
         }
 
         //Транспонирование матрицы
@@ -98,14 +103,18 @@ namespace StressStrainStateAnalyzer.Extensions
         public static double[,] CalcGauss(this double[,] matrix, List<INode> nodes)
         {
             double variable;
+            var copy = new double[matrix.GetLength(0), matrix.GetLength(1)];
+            for (int i = 0; i < matrix.GetLength(0); i++)
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                    copy[i, j] = matrix[i, j];
             for (var i = 0; i < nodes.Count * 2; i++)
             {
-                if (matrix[i, i] == 0)
+                if (copy[i, i] == 0)
                 {
                     var index = i + 1;
                     while (index < nodes.Count * 2)
                     {
-                        if (matrix[index, i] != 0)
+                        if (copy[index, i] != 0)
                             break;
                         index++;
                     }
@@ -114,23 +123,23 @@ namespace StressStrainStateAnalyzer.Extensions
                     {
                         for (var j = i; j < nodes.Count * 2 + 1; j++)
                         {
-                            matrix[i, j] = matrix[i, j] + matrix[index, j];
-                            matrix[index, j] = matrix[i, j] - matrix[index, j];
-                            matrix[i, j] = matrix[i, j] - matrix[index, j];
+                            copy[i, j] = copy[i, j] + copy[index, j];
+                            copy[index, j] = copy[i, j] - copy[index, j];
+                            copy[i, j] = copy[i, j] - copy[index, j];
                         }
                     }
                 }
 
-                variable = matrix[i, i];
+                variable = copy[i, i];
                 for (var j = nodes.Count * 2; j >= i; j--)
-                    matrix[i, j] = matrix[i, j] / variable;
+                    copy[i, j] = copy[i, j] / variable;
 
                 for (var j = i + 1; j < nodes.Count * 2; j++)
                 {
-                    variable = matrix[j, i];
+                    variable = copy[j, i];
                     if (variable != 0)
                         for (var k = nodes.Count * 2; k >= i; k--)
-                            matrix[j, k] = matrix[j, k] - variable * matrix[i, k];
+                            copy[j, k] = copy[j, k] - variable * copy[i, k];
                 }
 
             }
@@ -139,12 +148,12 @@ namespace StressStrainStateAnalyzer.Extensions
             {
                 for (var j = i - 1; j >= 0; j--)
                 {
-                    matrix[j, nodes.Count * 2] -= matrix[j, i] * matrix[i, nodes.Count * 2];
-                    matrix[j, i] = 0;
+                    copy[j, nodes.Count * 2] -= copy[j, i] * copy[i, nodes.Count * 2];
+                    copy[j, i] = 0;
                 }
             }
 
-            return matrix;
+            return copy;
         }
     }
 }

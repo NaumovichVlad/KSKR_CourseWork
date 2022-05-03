@@ -2,6 +2,7 @@
 
 namespace StressStrainStateAnalyzer.FiniteElements
 {
+    //Конечный элемент
     public interface IFiniteElement
     {
         int Index { get; set; }

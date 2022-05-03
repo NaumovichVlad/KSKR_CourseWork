@@ -4,6 +4,7 @@ using StressStrainStateAnalyzer.Nodes;
 
 namespace StressStrainStateAnalyzer.MeshBulders
 {
+    //Генератор сетки
     public class TriangleMeshBuilder : IMeshBuilder
     {
         private List<IFiniteElement> _finiteElements = new List<IFiniteElement>();

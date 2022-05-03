@@ -6,6 +6,7 @@ namespace StressStrainStateAnalyzer.Meshes.Factory
 {
     public static class MeshFactory
     {
+        //Фабрика сеток
         public static Mesh? GetMesh(FiniteElementsTypes type, List<INode> nodes, double maxElementSquare, double minAngle)
         {
             Mesh mesh;

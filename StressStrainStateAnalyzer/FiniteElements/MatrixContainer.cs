@@ -3,18 +3,19 @@ using StressStrainStateAnalyzer.Nodes;
 
 namespace StressStrainStateAnalyzer.FiniteElements
 {
+    //Вычисление глобальной матрицы жёсткости
     public class MatrixContainer
     {
         private double[,] _coordinateMatrix;
         private double[,] _inverseCoordinateMatrix;
         private double[,] _elasticityMatrix;
-        private double[,] _stress;
         private double[,] _q;
         private double[,] _b;
 
         public double[,] LocalStiffnessMatrix { get; private set; }
         public double[,] Sig { get; set; }
         public bool IsInitialized { get; private set; }
+        public double[,] Stress { get; set; }
 
         public MatrixContainer()
         {
@@ -23,7 +24,7 @@ namespace StressStrainStateAnalyzer.FiniteElements
             _coordinateMatrix = new double[6, 6];
             _inverseCoordinateMatrix = new double[6, 6];
             _elasticityMatrix = new double[3, 3];
-            _stress = new double[6, 6];
+            Stress = new double[6, 6];
             _q = new double[3, 6];
             _b = new double[3, 6];
         }
@@ -87,8 +88,8 @@ namespace StressStrainStateAnalyzer.FiniteElements
         {
             var bb = _q.Multiply(_inverseCoordinateMatrix);
             var e = bb.Multiply(Sig);
-            _stress = _elasticityMatrix.Multiply(e);
-            return Math.Sqrt(Math.Pow(_stress[0, 0], 2) + Math.Pow(_stress[1, 0], 2) - _stress[0, 0] * _stress[1, 0] + 3 * Math.Pow(_stress[2, 0], 2));
+            Stress = _elasticityMatrix.Multiply(e);
+            return Math.Sqrt(Math.Pow(Stress[0, 0], 2) + Math.Pow(Stress[1, 0], 2) - Stress[0, 0] * Stress[1, 0] + 3 * Math.Pow(Stress[2, 0], 2));
         }
     }
 }

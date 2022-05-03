@@ -1,4 +1,6 @@
 ﻿using AnalyzerUI.ModalWindows;
+using Microsoft.Win32;
+using StressStrainStateAnalyzer.DataManagers;
 using StressStrainStateAnalyzer.FiniteElements;
 using StressStrainStateAnalyzer.Meshes;
 using StressStrainStateAnalyzer.Meshes.Factory;
@@ -20,6 +22,8 @@ namespace AnalyzerUI
     {
         private double _maxSize = 40;
         private double _minAngle = 25;
+        private List<INode> _vCashNodes = new List<INode>();
+        private List<INode> _aCashNodes = new List<INode>();
         private Mesh? _mesh;
         public MainWindow()
         {
@@ -38,8 +42,8 @@ namespace AnalyzerUI
             L2TextBox.Text = "0,04";
             R2TextBox.Text = "0,02";
             PressTextBox.Text = "100";
-            JungKoefTextBox.Text = "210E9";
-            PuassonKoefTextBox.Text = "0,28";
+            JungKoefTextBox.Text = "2E11";
+            PuassonKoefTextBox.Text = "0,3";
         }
 
         private void BuildMeshBtn_Click(object sender, RoutedEventArgs e)
@@ -305,6 +309,7 @@ namespace AnalyzerUI
             DisplacementXBtn.IsEnabled = true;
             DisplacementYBtn.IsEnabled = true;
             StressBtn.IsEnabled = true;
+            MakeCalculationsBtn.IsEnabled = false;
         }
 
         private void DeformationBtn_Click(object sender, RoutedEventArgs e)
@@ -426,6 +431,50 @@ namespace AnalyzerUI
             if (coeff < 0.9)
                 return new SolidColorBrush(Color.FromRgb(255, 90, 0));
             return new SolidColorBrush(Color.FromRgb(255, 0, 0));
+        }
+
+        private void VerifyMeshBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialogWin = new ExportModalWindow(new ExcelDataManager());
+            dialogWin.ShowDialog();
+            if (dialogWin.IsSuccessfull)
+            {
+                _mesh = new Mesh(dialogWin.Elements, dialogWin.Nodes);
+                DrawMesh(_mesh.FiniteElements, double.Parse(WidthTextBox.Text) * 1000, double.Parse(HeightTextBox.Text) * 1000);
+                MakeCalculationsBtn_Click(sender, e);
+                CalculateLoss(dialogWin);
+                SaveReportBtn.IsEnabled = true;
+            }
+        }
+
+        private void CalculateLoss(ExportModalWindow dialogWin)
+        {
+            var stressNodes = dialogWin.VerifyNodes;
+            var nodes = new List<INode>();
+            _mesh.FiniteElements.ForEach(e => nodes.AddRange(e.Nodes));
+            nodes = nodes.Distinct().OrderByDescending(n => n.Stress).Take(10).ToList();
+            _aCashNodes = nodes;
+            var losses = new List<double>();
+            foreach (var node in nodes)
+            {
+                var verifyNode = stressNodes.Find(n => n.Index == node.Index);
+                _vCashNodes.Add(verifyNode);
+                var loss = Math.Abs(verifyNode.Stress - node.Stress) / verifyNode.Stress * 100;
+                losses.Add(loss);
+            }
+            MaxLossTextBox.Text = losses.Max().ToString();
+        }
+
+        private void SaveReportBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var manager = new ExcelDataManager();
+            var saveFD = new SaveFileDialog();
+            saveFD.Filter = "Файлы xlsx|*.xlsx";
+            if (saveFD.ShowDialog() != true)
+                return;
+            manager.SaveReport(_aCashNodes, _vCashNodes, saveFD.FileName);
+            SaveReportBtn.IsEnabled = false;
+            MessageBox.Show("Отчёт сохранён");
         }
     }
 }

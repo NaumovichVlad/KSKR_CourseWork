@@ -1,7 +1,9 @@
-﻿using StressStrainStateAnalyzer.Nodes;
+﻿using StressStrainStateAnalyzer.Extensions;
+using StressStrainStateAnalyzer.Nodes;
 
 namespace StressStrainStateAnalyzer.FiniteElements
 {
+    //Треугольный конечный элемент
     public class TriangleFiniteElement : IFiniteElement
     {
         private readonly MatrixContainer _container;
@@ -34,6 +36,13 @@ namespace StressStrainStateAnalyzer.FiniteElements
         public void CalculateStress()
         {
             Stress = _container.CalculateStress();
+            CalculateNodesStress();
+        }
+
+        private void CalculateNodesStress()
+        {
+            for (int i = 0; i < Nodes.Count; i++)
+                Nodes[i].Stress = Math.Abs(_container.Stress[i, 0]);
         }
 
         public double CalculateSquare()
